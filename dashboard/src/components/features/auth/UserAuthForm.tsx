@@ -2,79 +2,105 @@ import { SmallCircularSpinner } from "@/components/common/loader/SmallCicularSpi
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useToast } from "@/components/ui/use-toast"
 import { cn } from "@/lib/utils"
 import { useFrappePostCall } from "frappe-react-sdk"
-import { useState } from "react"
-import { AiFillGithub } from "react-icons/ai"
-import { useNavigate } from "react-router-dom"
+import { useEffect } from "react"
+import { FormProvider, useForm } from "react-hook-form"
 
-const CLIENT_ID = 'Iv1.9804642ea04317fb'
+interface UserAuthFormFields {
+    full_name: string
+    email: string
+}
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {
     className?: string
 }
 
 export const UserAuthForm = ({ className, ...props }: UserAuthFormProps) => {
-    const [isLoading, setIsLoading] = useState<boolean>(false)
 
-    async function onSubmit(event: React.SyntheticEvent) {
-        event.preventDefault()
-        setIsLoading(true)
+    const methods = useForm<UserAuthFormFields>()
 
-        setTimeout(() => {
-            setIsLoading(false)
-        }, 3000)
+    const { call, loading } = useFrappePostCall('frappe.core.doctype.user.user.sign_up')
+
+    const { toast } = useToast()
+
+    const onSubmit = (data: UserAuthFormFields) => {
+        call({
+            full_name: data.full_name,
+            email: data.email,
+            redirect_to: ''
+        }).then((res) => {
+            return res.message
+        }).then((res) => {
+            if (res[0] === 1) {
+                toast({
+                    title: 'Success',
+                    description: 'Please check your email for verification link',
+                })
+            }
+        }).catch((err) => {
+            console.log(err)
+        })
     }
 
-    const navigate = useNavigate()
-
-    const { call } = useFrappePostCall('commit.commit.doctype.github_settings.github_settings.authenticate_user')
-    // console.log(data);
-
-    const loginWithGithub = () => {
-        window.location.assign('https://github.com/login/oauth/authorize?client_id=' + CLIENT_ID + '&scope=user')
-    }
+    useEffect(() => {
+        methods.reset()
+    })
 
     return (
         <div className={cn("grid gap-6", className)} {...props}>
-            <form onSubmit={onSubmit}>
-                <div className="grid gap-2">
-                    <div className="grid gap-1">
-                        <Label className="sr-only" htmlFor="email">
-                            Email
-                        </Label>
-                        <Input
-                            id="email"
-                            placeholder="name@example.com"
-                            type="email"
-                            autoCapitalize="none"
-                            autoComplete="email"
-                            autoCorrect="off"
-                            disabled={isLoading}
-                        />
+            <FormProvider {...methods}>
+                <form onSubmit={methods.handleSubmit(onSubmit)}>
+                    <div className="grid gap-2">
+                        <div className="grid gap-1">
+                            <Label className="sr-only" htmlFor="full_name">
+                                Full Name
+                            </Label>
+                            <Input
+                                {...methods.register("full_name", { required: { value: true, message: "Full Name is required" } })}
+                                id="full_name"
+                                placeholder="John Doe"
+                                type="text"
+                                autoCapitalize="none"
+                                autoComplete="name"
+                                autoCorrect="off"
+                                disabled={loading}
+                            />
+                        </div>
+                        <div className="grid gap-1">
+                            <Label className="sr-only" htmlFor="email">
+                                Email
+                            </Label>
+                            <Input
+                                {...methods.register("email", { required: { value: true, message: "Email is required" } })}
+                                required
+                                id="email"
+                                placeholder="name@example.com"
+                                type="email"
+                                autoCapitalize="none"
+                                autoComplete="email"
+                                autoCorrect="off"
+                                disabled={loading}
+                            />
+                        </div>
+                        <Button disabled={loading} type="submit" className="mt-1">
+                            {loading && (
+                                <SmallCircularSpinner className="pr-2" />
+                            )}
+                            Sign Up with Email
+                        </Button>
+                        <Button disabled={loading} type="button" onClick={() => {
+                            toast({
+                                title: 'Coming Soon',
+                                description: 'This feature is coming soon',
+                            })
+                        }} className="mt-1">
+                            Sign Up with Google
+                        </Button>
                     </div>
-                    <Button disabled={isLoading} className="mt-1">
-                        {isLoading && (
-                            <SmallCircularSpinner className="pr-2" />
-                        )}
-                        Sign In with Email
-                    </Button>
-                </div>
-            </form>
-            <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-muted-foreground">
-                        Or continue with
-                    </span>
-                </div>
-            </div>
-            <Button variant="outline" type="button" disabled={isLoading} onClick={loginWithGithub}>
-                {isLoading ? <SmallCircularSpinner /> : <div className="text-lg pr-1"><AiFillGithub /></div>}{" "}
-                Github
-            </Button>
+                </form>
+            </FormProvider>
         </div>
     )
 }
