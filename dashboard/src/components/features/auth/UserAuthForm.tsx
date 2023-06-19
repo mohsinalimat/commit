@@ -46,7 +46,7 @@ export const UserAuthForm = ({ className, ...props }: UserAuthFormProps) => {
 
     useEffect(() => {
         methods.reset()
-    })
+    }, [])
 
     return (
         <div className={cn("grid gap-6", className)} {...props}>
