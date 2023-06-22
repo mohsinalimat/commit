@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Separator } from "@/components/ui/separator"
 
 export const LogIn = () => {
 
@@ -51,6 +52,12 @@ export const LogIn = () => {
                                     <div className="text-xs text-center">
                                         <a href="#" className="font-medium text-gray-400 hover:text-blue-800">
                                             Forgot your password?
+                                        </a>
+                                    </div>
+                                    <Separator />
+                                    <div className="text-sm text-center">
+                                        <a href="/sign-up" className="font-medium text-gray-900 hover:text-blue-800">
+                                            Don't have an account? Sign up
                                         </a>
                                     </div>
                                 </form>
