@@ -90,14 +90,6 @@ export const UserAuthForm = ({ className, ...props }: UserAuthFormProps) => {
                             )}
                             Sign Up with Email
                         </Button>
-                        <Button disabled={loading} type="button" onClick={() => {
-                            toast({
-                                title: 'Coming Soon',
-                                description: 'This feature is coming soon',
-                            })
-                        }} className="mt-1">
-                            Sign Up with Google
-                        </Button>
                     </div>
                 </form>
             </FormProvider>
