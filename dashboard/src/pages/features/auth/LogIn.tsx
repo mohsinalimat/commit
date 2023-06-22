@@ -44,7 +44,7 @@ export const LogIn = () => {
 
                                     <div>
                                         <Button className="w-full">
-                                            Sign in with Email
+                                            Send me a login link
                                         </Button>
                                     </div>
 
