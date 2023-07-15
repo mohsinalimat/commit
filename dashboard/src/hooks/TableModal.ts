@@ -1,7 +1,10 @@
 import { nanoid } from 'nanoid';
-import graphState from './graphState';
 import { useFrappeUpdateDoc } from 'frappe-react-sdk';
 import { commentHeight, fieldHeight, tableMarginLeft, tableMarginTop, tableRowNumbers, tableWidth, titleHeight } from '@/utils/erd/settings';
+import { useContext } from 'react';
+import { GraphStateContext } from './graphState';
+import { DocType } from '@/types/Core/DocType';
+import { DocField } from '@/types/Core/DocField';
 
 
 export const TableModal = () => {
@@ -19,7 +22,7 @@ export const TableModal = () => {
         setEditingTable,
         setEditingField,
         setAddingField,
-    } = graphState.useContainer();
+    } = useContext(GraphStateContext)
 
 
     const { updateDoc } = useFrappeUpdateDoc()
@@ -42,11 +45,11 @@ export const TableModal = () => {
     };
 
     const calcXY = (start?: number, tables = tableList) => {
-        const index = start || Math.max(1, tables.length);
+        const index = start || Math.max(1, tables?.length);
         let x, y;
-        if (!tables.length) {
-            x = box.x + 196 + 72;
-            y = box.y + 72;
+        if (!tables?.length) {
+            x = box?.x + 196 + 72;
+            y = box?.y + 72;
         } else {
             if (index < tableRowNumbers) {
                 const lastTable: any = tables[index - 1];
@@ -70,28 +73,21 @@ export const TableModal = () => {
     /**
      * It creates a new table object and adds it to the table dictionary
      */
-    const addTable = () => {
+    const addTable = (tableName: string) => {
         const [x, y] = calcXY();
         const id = nanoid();
         const newTable = {
             [id]: {
                 id,
-                name: `Table Name ${tableList.length + 1}`,
+                name: tableName,
                 x,
                 y,
-                fields: [
-                    {
-                        id: nanoid(),
-                        name: 'id',
-                        type: 'INTEGER',
-                        pk: true,
-                        increment: true,
-                    },
-                ],
+                fields: [],
             },
         };
         // setTableDict(state => ({ ...state, ...newTable }));
         setEditingTable(newTable[id]);
+        return newTable[id];
     };
 
     /**
@@ -171,6 +167,27 @@ export const TableModal = () => {
         setAddingField({ index: index + 1, table });
     };
 
+    const addBulkFields = (table: any, doctype: DocType) => {
+        doctype.fields?.forEach((field: DocField) => {
+            table.fields.push({
+                id: nanoid(),
+                name: field.label,
+                fieldName: field.fieldname,
+                type: field.fieldtype,
+                unique: false,
+            })
+        })
+        setTableDict((state: any) => {
+            return {
+                ...state,
+                [table.id]: {
+                    ...state[table.id],
+                    ...table,
+                },
+            };
+        })
+    }
+
     const removeField = (table: any, index: any) => {
         const [filed] = table.fields.splice(index, 1);
         setTableDict((state: any) => {
@@ -215,6 +232,7 @@ export const TableModal = () => {
         removeTable,
         addField,
         removeField,
+        addBulkFields,
         // applyVersion,
         calcXY,
     };

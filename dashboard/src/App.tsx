@@ -3,7 +3,10 @@ import { UserProvider } from './utils/auth/UserProvider'
 import { ProtectedRoute } from './utils/auth/ProtectedRoute'
 import { SignUp } from './pages/features/auth/SignUp'
 import { FrappeProvider } from 'frappe-react-sdk'
-import { ERDList } from './components/erd/ERDList'
+// import { ERDList } from './components/erd/ERDList'
+import { ERDGraph } from './components/erd/ERD'
+import './styles/globals.css'
+
 
 function App() {
 
@@ -18,7 +21,7 @@ function App() {
               {/** Private Routes */}
               <Route path="/" element={<ProtectedRoute />} />
               <Route path="/dashboard" element={<h1>Dashboard</h1>} />
-              <Route path='erd' element={<ERDList />} />
+              <Route path='erd/:id' element={<ERDGraph />} />
             </Routes>
           </UserProvider>
         </BrowserRouter>
